@@ -1,0 +1,29 @@
+---
+# tasks for installing the agent on Windows
+
+- name: Windows | run msiexec via win-command
+  win_command: "msiexec /i {{ acc_dst_pkg_path }}\\{{ acc_pkg_filename }} /quiet /qn /norestart ACC_ALLOW_LIST=False ACC_MID={{ mid_webserver_url }}"
+    
+
+# - name: Windows | Install agent-client-collector from local source
+#   win_package:
+#     path: "{{ acc_dst_pkg_path }}\\{{ acc_pkg_filename }}"
+#     state: present
+#     validate_certs: no
+#     creates_service: "AgentClientCollector"
+#     arguments:
+#       - /i
+#       - /norestart
+#       - /quiet
+#       - /qn
+#       - ACC_ALLOW_LIST=False
+# #      - ACC_USER="{{ websocket_user }}"
+# #      - ACC_PWD="{{ websocket_password }}"
+#       - ACC_MID="{{ mid_webserver_url }}"
+#     tags:
+#       - "pkg"
+#       - "config"
+# #    product_id: '{}'
+# #    become: yes
+# #    become_method: runas
+# #    become_user: Administrator

@@ -1,0 +1,25 @@
+---
+# tasks file for sn-acc-role
+
+- name: Include OS specific variables
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags:
+    - "init"
+
+- name: Copy Package to Target
+  include_tasks: "packages/copy-pkg.yml"
+  tags:
+    - "pkg"
+  when: install_from == "local_install"
+
+- name: agent-client-collector package install
+  include_tasks: "packages/install-{{ ansible_system }}.yml"
+  tags:
+    - "pkg"
+  when: acc_agent_install
+
+- name: Configure the Agent Client Collector service
+  include_tasks: "agent/config-{{ ansible_system }}.yml"
+  tags:
+    - "config"
+  when: acc_agent_configuration

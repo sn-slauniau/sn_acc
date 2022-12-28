@@ -1,0 +1,23 @@
+---
+# tasks for managing the Windows service
+
+- name: Windows Create ServiceNow Agent Directories
+  ansible.windows.win_owner:
+    path: "{{ item }}"
+    user: "{{ acc_service_owner }}"
+    recurse: yes
+  loop:
+    - C:\ProgramData\ServiceNow
+ 
+- name: agent config file for Windows system
+  win_template:
+    src: acc.yml.j2
+    dest: "{{ acc_configfile }}"
+  notify: "acc-agent restart {{ ansible_system }}"
+
+- name: acc-agent config Win32NT
+  win_service:
+    name: "{{ acc_agent_service }}"
+    username: "{{ acc_service_owner }}"
+    password: "{{ acc_service_psswd }}"
+    notify: "acc-agent restart {{ ansible_system }}"

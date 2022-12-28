@@ -1,0 +1,4 @@
+User_Alias     ACC_USERS = {{ acc_sudo_users|join(', ') }}
+Cmnd_Alias     ACC_CMD = {{ acc_sudo_commands|join(', ') }}
+ACC_USERS      ALL = (root) NOPASSWD:ACC_CMD
+

@@ -1,0 +1,25 @@
+[Unit]
+Description=Agent-Now ACC
+After=network-online.target
+
+[Service]
+Environment=AGENT_ROOT=/usr/share
+Environment=AGENT_CACHE_ROOT={{ acc_cache_root }}
+Environment=AGENT_CONFIG_ROOT={{ acc_config_root }}
+Environment=AGENT_LOG_ROOT={{ acc_log_root }}
+Environment=AGENT_RUN_ROOT={{ acc_run_root }}
+Environment=RUBYOPT=-Eutf-8
+User={{ acc_service_owner }}
+Group={{ acc_service_group }}
+ExecStart=/usr/share/servicenow/agent-client-collector/bin/acc-service start acc
+KillMode=process
+Restart=on-failure
+RestartSec=1min
+CPUShares=128
+CPUQuota=10%
+MemoryLimit=192M
+BlockIOWeight=10
+LimitNICE=+15
+
+[Install]
+WantedBy=network-online.target

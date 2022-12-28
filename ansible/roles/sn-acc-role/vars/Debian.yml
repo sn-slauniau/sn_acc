@@ -1,0 +1,26 @@
+---
+acc_pkg_filename: agent-client-collector-3.0.0-debian-9_amd64.deb
+acc_dst_pkg_path: /tmp
+acc_url_dir: "https://install.service-now.com/glide/distribution/builds/package/app-signed"
+acc_package_url: "{{ acc_url_dir }}/{{ acc_pkg_filename }}"
+acc_package_os: agent-client-collector
+acc_systemd_service: "/usr/lib/systemd/system/acc.service"
+acc_agent_service: acc
+acc_config_root: "/etc"
+acc_cache_root: "/var/cache"
+acc_log_root: "/var/log"
+acc_run_root: "/var/run"
+root_sn_path: "servicenow"
+acc_sn_path: "{{ root_sn_path }}/agent-client-collector"
+acc_configfile: "{{ acc_config_root }}/{{ acc_sn_path }}/acc.yml"
+acc_service_owner: sn_acc
+acc_service_group: sn_acc
+acc_sudoers: /etc/sudoers.d/01_servicenow
+acc_sudo_users:
+  - "{{ acc_service_owner }}"
+acc_sudo_commands:
+  - "/usr/sbin/dmidecode"
+  - "/usr/bin/ss"
+  - "/usr/bin/systemctl"
+  - "/usr/bin/apt-get"
+  - "/usr/local/bin/syft"

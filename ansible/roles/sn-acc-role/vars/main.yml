@@ -1,0 +1,11 @@
+---
+# vars file for sn-acc-role
+acc_auto_mid_selection: false
+cpu_percentage_limit: 25
+repeated_high_cpu_num: 3
+monitor_interval_sec: 60
+agent_cpu_threshold_disabled: false
+disable_sockets: true
+disable_api: true
+statsd_disable: true
+max_running_checks: 10

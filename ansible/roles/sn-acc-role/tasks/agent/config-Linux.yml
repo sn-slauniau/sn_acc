@@ -1,0 +1,81 @@
+---
+# tasks file for managing sudoers, agent installation and acc.yml
+
+- name: Add the service user to run the agent
+  group:
+    name: "{{ acc_service_group }}"
+    system: true
+    state: present
+
+- name: Add the service user to run the agent
+  user:
+    name: "{{ acc_service_owner }}"
+    group: "{{ acc_service_group }}"
+    comment: "Added by ansible"
+    system: true
+    create_home: false
+    home: "/usr/share/servicenow/agent-client-collector"
+    shell: "/bin/false"
+    state: present
+
+- name: Create Parent Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0711
+  loop:
+    - "{{ acc_config_root }}/{{ root_sn_path }}"
+    - "{{ acc_cache_root }}/{{ root_sn_path }}"
+    - "{{ acc_run_root }}/{{ root_sn_path }}"
+    - "{{ acc_log_root }}/{{ root_sn_path }}"
+
+- name: Create ServiceNow Agent Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ acc_service_owner }}"
+    group: "{{ acc_service_group }}"
+    mode: u=rwX,g=,o=
+### comment "recurse" in case some files have different mode/ownership
+    recurse: yes
+  loop:
+    - "{{ acc_config_root }}/{{ acc_sn_path }}"
+    - "{{ acc_cache_root }}/{{ acc_sn_path }}"
+    - "{{ acc_run_root }}/{{ acc_sn_path }}"
+    - "{{ acc_log_root }}/{{ acc_sn_path }}"
+
+- name: Copy Allow List
+  copy:
+    src: "files/check-allow-list.json"
+    dest: "{{ acc_config_allow_list }}"
+#    owner: root
+    owner: "{{ acc_service_owner }}"
+    group: "{{ acc_service_group }}"
+    mode: 0440
+  when: acc_config_enable_allow_list | bool
+
+- name: Allow agent user to run specific commands as root via sudo
+  template: 
+    src: sudoers.j2
+    dest: "{{ acc_sudoers }}"
+    mode: 0440
+    owner: root
+    group: root
+    validate: 'visudo -cf %s'
+
+- name: Systemd ACC service
+  template:
+    src: acc.service.j2
+    dest: "{{ acc_systemd_service }}"
+  notify: "acc-agent restart {{ ansible_system }}"
+
+- name: Agent config file for Linux system
+  template:
+    src: acc.yml.j2
+    dest: "{{ acc_configfile }}"
+    owner: "{{ acc_service_owner }}"
+    group: "{{ acc_service_group }}"
+    mode: 0600
+  notify: "acc-agent restart {{ ansible_system }}"

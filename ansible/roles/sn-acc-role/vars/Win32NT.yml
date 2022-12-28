@@ -1,0 +1,23 @@
+---
+#acc_pkg_filename: agent-client-collector-2.3.0-windows-x64.msi
+#acc_pkg_filename: agent-client-collector-2.5.0-windows-x64.msi
+acc_pkg_filename: agent-client-collector-2.8.2-windows-x64.msi
+# acc_dst_pkg_path: C:\Users\ansible\Documents
+acc_dst_pkg_path: "C:"
+#acc_url_msi: "https://install.service-now.com/glide/distribution/builds/package/agent-client-collector/agent-client-collector-2.3.0-windows-x64.msi"
+#acc_url_msi: "https://install.service-now.com/glide/distribution/builds/package/app-signed/agent-client-collector-2.5.0-windows-x64.msi"
+acc_url_msi: "https://install.service-now.com/glide/distribution/builds/package/app-signed/agent-client-collector-2.8.2-windows-x64.msi"
+
+### https://install.service-now.com/glide/distribution/builds/package/app-signed/agent-client-collector-2.8.2-windows-x64.msi
+
+## MSI v2.5.0
+acc_msi_checksum: "e7864c6b403b2f4fac97d994174d7c4dabc84fd6e6f95c9961fbb9691bbd7de4"
+acc_msi_checksum_algo: "sha256"
+acc_agent_service: AgentClientCollector
+acc_configfile: C:\ProgramData\ServiceNow\agent-client-collector\config\acc.yml
+#acc_service_owner: servicenow
+#acc_service_group: servicenow
+ansible_winrm_server_cert_validation: ignore
+
+## MSI v2.3.0
+#acc_msi_checksum: "b1526585eaf7bed74e75d7b07ff9acb5ad9afbdb3bffe7a45436ce9485a034cf"

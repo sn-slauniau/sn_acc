@@ -1,0 +1,18 @@
+---
+- hosts: linux
+  become: yes
+  become_user: root
+  become_method: sudo
+  serial:
+    - 10
+    - "50%"
+  order: sorted
+  gather_facts: yes
+  roles:
+    - sn-acc-role
+  vars_files:
+    - ./vars/websocket.yml
+  tags:
+    - pkg
+    - config
+    - linux

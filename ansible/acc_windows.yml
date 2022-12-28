@@ -1,0 +1,15 @@
+---
+- hosts: windows
+  gather_facts: yes
+#  become_method: runas
+
+  roles:
+    - sn-acc-role
+
+  vars_files:
+    - ./vars/websocket.yml
+
+  tags:
+    - pkg
+    - config
+    - windows

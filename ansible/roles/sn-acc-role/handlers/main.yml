@@ -1,0 +1,24 @@
+---
+# handlers file for sn-acc-role
+- name: acc-agent restart Linux
+  service:
+    name: "{{ acc_agent_service }}"
+    state: restarted
+    daemon_reload: yes
+  tags:
+    - "service"
+
+#- name: acc-agent restart Darwin
+#  shell: |
+#    
+#    launchctl unload "{{ acc_agent_service }}"
+#    launchctl load "{{ acc_agent_service }}"
+
+- name: acc-agent restart Win32NT
+  win_service:
+    name: "{{ acc_agent_service }}"
+    username: "{{ acc_service_owner }}"
+    password: "{{ acc_service_psswd }}"
+    state: restarted
+  tags:
+    - "service"

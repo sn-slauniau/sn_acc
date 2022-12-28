@@ -1,0 +1,61 @@
+---
+# Agent Client Collector configuration
+######################################
+###                                 ##
+### THIS FILE IS MANAGED BY ANSIBLE ##
+###                                 ##
+######################################
+
+### Agent Log Level
+log-level: "{{ acc_config_log_level }}"
+
+### MID Web Socket endpoint configuration
+
+backend-url:
+ - "{{ mid_webserver_url }}"
+
+{% if use_basic_auth | bool -%}
+user: "{{ websocket_user }}"
+password: "{{ websocket_password }}"
+{% elif use_api_key_enc | bool -%}
+api-key: "{{ websocket_api_key_enc }}"
+agent-key-id: {{ acc_agent_key_id }}
+{% elif use_api_key | bool -%}
+api-key: "{{ websocket_api_key }}"
+{% else -%}
+api-key: "not provided"
+{% endif %}
+
+skip-tls-verify: {{ acc_config_skip_tls_verify }}
+
+enable-auto-mid-selection: {{ acc_auto_mid_selection }}
+
+### Plugin validation
+
+verify-plugin-signature: {{ acc_config_verify_plugin_signature }}
+
+### Check Definition Execution
+
+{% if acc_config_enable_allow_list | bool -%}
+allow-list: {{ acc_config_allow_list }}
+{% endif %}
+
+max-running-checks: {{ max_running_checks }}
+
+agent_cpu_threshold:
+ cpu_percentage_limit: {{ cpu_percentage_limit }}
+ repeated_high_cpu_num: {{ repeated_high_cpu_num }}
+ monitor_interval_sec: {{ monitor_interval_sec }}
+ agent_cpu_threshold_disabled: {{ agent_cpu_threshold_disabled }}
+
+### Internal configuration
+
+disable-sockets: {{ disable_sockets }}
+disable-api: {{ disable_api }}
+statsd-disable: {{ statsd_disable }}
+
+
+## { % for custom_option in (acc_agent_custom_options | from_yaml) % }
+## { { custom_option } }
+## { % endfor % }
+

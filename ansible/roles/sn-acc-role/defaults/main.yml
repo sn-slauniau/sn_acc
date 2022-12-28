@@ -1,0 +1,26 @@
+---
+# defaults file for sn-acc-role
+
+## install_from: os_repository | local_install
+install_from: local_install
+ 
+## acc_agent_configuration: true | false
+acc_agent_configuration: true
+
+## acc_src_pkg_path
+acc_src_pkg_path: files
+
+## acc_agent_install: true | false
+acc_agent_install: true
+
+acc_config_log_level: "info"
+acc_config_skip_tls_verify: false
+acc_config_enable_allow_list: true
+acc_config_allow_list: "/etc/servicenow/agent-client-collector/check-allow-list.json"
+acc_config_verify_plugin_signature: false
+
+
+# acc_agent_custom_options:
+#   - log-level = "info"
+#   - verify-plugin-signature = true
+acc_agent_custom_options: []

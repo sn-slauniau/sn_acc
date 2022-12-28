@@ -1,0 +1,57 @@
+---
+# tasks to install the agent on Linux
+
+# - name: Assign content to yum tsflags
+#   copy:
+#     content: "noscripts\n"
+#     dest: "/etc/yum/vars/tsflags"
+#   when: ansible_facts['os_family'] == "RedHat"
+    
+# - name: Force yum tsflags to noscripts
+#   file:
+#     path: "/etc/yum/vars/tsflags"
+#     state: file
+#     owner: root
+#     group: root
+#     mode: '0644'
+#   when: ansible_facts['os_family'] == "RedHat"
+
+- name: Install agent-client-collector from os repository
+  package:
+    name: "{{ acc_package_os }}"
+    state: latest
+    disable_gpg_check: false
+  when: install_from == "os_repository"
+
+- name: Install agent-client-collector from local source - RPM-based
+  package:
+    name: "{{ acc_dst_pkg_path }}/{{ acc_pkg_filename }}"
+    state: latest
+    disable_gpg_check: true
+  when: install_from == "local_install" and
+        ansible_facts['os_family'] != "Debian"
+
+- name: Install agent-client-collector from local source - DEB-based
+  package:
+    deb: "{{ acc_dst_pkg_path }}/{{ acc_pkg_filename }}"
+    state: present
+  when: install_from == "local_install" and
+        ansible_facts['os_family'] == "Debian"
+
+- name: Install agent-client-collector from url - RPM-based
+  package:
+    name: "{{ acc_package_url }}"
+    state: latest
+    disable_gpg_check: true
+#    cacheonly: true
+  when: install_from == "url" and
+        ansible_facts['os_family'] != "Debian"
+
+- name: Install agent-client-collector from url - DEB-based
+  package:
+    deb: "{{ acc_package_url }}"
+    state: present
+  when: install_from == "url" and
+        ansible_facts['os_family'] == "Debian"
+
+

@@ -1,0 +1,34 @@
+---
+# tasks file for copying the source package
+
+- name: Copy file for Linux system
+  copy:
+    src: "{{ acc_src_pkg_path }}/{{ acc_pkg_filename }}"
+    dest: "{{ acc_dst_pkg_path }}/{{ acc_pkg_filename }}"
+    owner: root
+    group: root
+    mode: 0600
+  when: ansible_system == "Linux"
+
+#  when: ansible_facts['os_family'] == "RedHat" or
+#        ansible_facts['os_family'] == "Suse"
+
+#  when: ansible_distribution == "CentOS" or
+#        ansible_distribution == "SLES"   or
+#        ansible_distribution == "RedHat"
+
+- name: Get MSI file for Windows system
+  win_get_url:
+    url: "{{ acc_url_msi }}"
+#    dest: "{{ acc_dst_pkg_path }}\\{{ acc_pkg_filename }}"
+    dest: "{{ acc_dst_pkg_path }}"
+    checksum: "{{ acc_msi_checksum }}"
+    checksum_algorithm: "{{ acc_msi_checksum_algo }}"
+    follow_redirects: "none"
+    force: "no"
+    validate_certs: "yes"
+  when: ansible_facts['os_family'] == "Windows"
+#  when: ansible_system == "Win32NT"
+#  when: "'windows' in group_names"
+
+
