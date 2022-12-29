@@ -4,7 +4,8 @@ $msi = "osquery-5.6.0.msi"
 $url = "https://pkg.osquery.io/windows/$msi"
 $dst = "$PSScriptRoot\$msi"
 Invoke-WebRequest -Uri $url -OutFile $dst
-msiexec /i "$dst" /quiet /qn /norestart
+# msiexec /i "$dst" /quiet /qn /norestart
+Start-Process msiexec.exe -Wait "/i $dst /quiet /qn /norestart"
 
 # Configure osqueryd service
 
