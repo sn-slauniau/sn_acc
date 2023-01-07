@@ -25,7 +25,7 @@ $conf = @'
   },
   "schedule": {
     "sam_process_info": {
-      "query": "select name ,pid, elapsed_time, start_time, user_time, system_time, username from processes p JOIN users u ON u.uid = p.uid where p.elapsed_time != -1 ;",
+      "query": "SELECT name, pid, elapsed_time, start_time, user_time, system_time, username FROM processes p JOIN users u ON u.uid = p.uid WHERE p.elapsed_time != -1 AND u.type != 'special';",
       "snapshot" : true,
       "interval": 300
     },
