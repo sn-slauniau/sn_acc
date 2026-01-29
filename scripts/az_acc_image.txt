@@ -1,0 +1,58 @@
+export MSI="agent-client-collector-6.0.4-windows-x64.msi"
+export URL="https://install.service-now.com/glide/distribution/builds/package/app-signed/${MSI}"
+curl -O --silent "${URL}"
+file $MSI
+
+export SN_INSTANCE=myinstance
+-> On your instance, navigate to Agent Client Collector -> Agent Registration Key and retrieve the key value
+read -s ICS_KEY
+
+cp -a acc_ics.template.ps1 acc_ics.ps1
+cat acc_ics.ps1
+sed -i "s/AGENT_MSI/${MSI}/" acc_ics.ps1
+sed -i "s/MY_INSTANCE/${SN_INSTANCE}/" acc_ics.ps1
+sed -i "s/MY_ICS_KEY/${ICS_KEY}/" acc_ics.ps1
+cat acc_ics.ps1
+
+export AZ_GRP=ITOM
+export AZ_LOC=centralus
+export AZ_VM_SZ=Standard_B2s
+export AZ_VM=Win25kACC
+export AZ_VM_USER=vmadmin
+read -s AZ_VM_PWD
+
+note: "admin" forbidden
+
+export AZ_GAL_NAME=ITOMGallery
+export AZ_GAL_DEF=Win25kACC
+export AZ_GAL_PUBLISHER=MyCompany
+
+
+az login
+https://microsoft.com/devicelogin
+
+az vm create --resource-group ${AZ_GRP} --name ${AZ_VM} --image MicrosoftWindowsServer:WindowsServer:2025-Datacenter:latest --admin-username ${AZ_VM_USER} --admin-password ${AZ_VM_PWD} --location ${AZ_LOC} --public-ip-sku Standard --size ${AZ_VM_SZ}
+
+az vm run-command invoke --resource-group ${AZ_GRP} --name ${AZ_VM} --command-id RunPowerShellScript --scripts @acc_ics.ps1
+az vm run-command invoke -g ${AZ_GRP} -n ${AZ_VM} --command-id RunPowerShellScript --scripts "Start-Process -FilePath C:\Windows\System32\Sysprep\Sysprep.exe -ArgumentList '/generalize /oobe /shutdown /quiet' -Wait"
+az vm generalize -g ${AZ_GRP} -n ${AZ_VM}
+az sig create -g ${AZ_GRP} --gallery-name ${AZ_GAL_NAME}
+az sig image-definition create -g ${AZ_GRP} --gallery-name ${AZ_GAL_NAME} --gallery-image-definition ${AZ_GAL_DEF} --publisher ${AZ_GAL_PUBLISHER} --offer WindowsServer --sku 2025-Gen2 --os-type Windows --os-state Generalized --hyper-v-generation V1
+az sig image-version create -g ${AZ_GRP} --location ${AZ_LOC} --gallery-name ${AZ_GAL_NAME} --gallery-image-definition ${AZ_GAL_DEF} --gallery-image-version 1.0.0 --virtual-machine $(az vm show -g ${AZ_GRP} -n ${AZ_VM} --query id -o tsv)
+az sig image-version show -g ${AZ_GRP} --gallery-name ${AZ_GAL_NAME} --gallery-image-definition ${AZ_GAL_DEF} --gallery-image-version 1.0.0 --query id
+export IMAGE_ID=$(az sig image-version show -g ${AZ_GRP} --gallery-name ${AZ_GAL_NAME} --gallery-image-definition ${AZ_GAL_DEF} --gallery-image-version 1.0.0 --query id -o tsv)
+echo $IMAGE_ID
+
+for i in 1 2 3; do
+  az vm create \
+    --resource-group ${AZ_GRP} \
+    --name "Win25kACC-0${i}" \
+    --image ${IMAGE_ID} \
+    --size ${AZ_VM_SZ} \
+    --location ${AZ_LOC} \
+    --admin-username "${AZ_VM_USER}" \
+    --admin-password "${AZ_VM_PWD}" \
+    --no-wait
+done
+
+az vm list -g ${AZ_GRP} -d --query "[?contains(name, '$AZ_VM')].{Name:name, Provisioning:provisioningState, Power:powerState}" -o table
