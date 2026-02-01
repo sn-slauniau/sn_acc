@@ -1,0 +1,12 @@
+## agent-client-collector-6.0.4-x86_64.rpm
+RPM_NAME="AGENT_RPM"
+SN_URL="https://install.service-now.com/glide/distribution/builds/package/app-signed"
+CACHE_DIR="/opt/cache"
+VAR_RUN_DIR="/opt/run"
+SN_USR="svc_acc"
+SN_GRP="svc_acc"
+ACC_HOME_DIR="/usr/share/servicenow/agent-client-collector"
+ACC_DESC="ServiceNow Agent Client Collector"
+MID_API_KEY="MY_API_KEY"
+MID_WSS_URL="wss://MY_MID_HOSTNAME:443/ws/events"
+ACC_START_SERVICE=0
