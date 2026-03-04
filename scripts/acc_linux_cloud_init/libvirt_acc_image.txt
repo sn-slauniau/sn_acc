@@ -1,0 +1,76 @@
+# Scripts and resource files needed:
+# - install_sn_acc.sh
+# - settings.conf.template
+# - start_vdi.sh
+# - delete_vdi.sh
+
+# Main tools
+# - virt-install
+# - libvirt-client
+# - guestfs-tools
+# - genisoimage
+# - qemu-img
+# - curl / wget
+
+# Set up a MID server and validate it on the instance
+# Enable ACC listener; if using port 8443 for testing, run the following to forward traffic from 443 to 8443:
+
+sudo firewall-cmd --add-forward-port=port=443:proto=tcp:toport=8443
+success
+
+# Create a MID Web Server API Key and keep the value in your notes
+
+export AGENT_RPM=agent-client-collector-6.0.4-x86_64.rpm
+export MY_MID_HOSTNAME=mid.internal
+read -s MY_API_KEY
+echo $MY_API_KEY
+
+cp -a settings.conf.template settings.conf
+sed -i "s/AGENT_RPM/${AGENT_RPM}/" settings.conf
+sed -i "s/MY_MID_HOSTNAME/${MY_MID_HOSTNAME}/" settings.conf
+sed -i "s/MY_API_KEY/${MY_API_KEY}/" settings.conf
+cat settings.conf
+
+export VDI_USER=alma
+read -s VDI_PWD
+export VDI_PWD
+
+# download the official image and make a copy of it
+curl -O --silent https://repo.almalinux.org/almalinux/10/cloud/x86_64/images/AlmaLinux-10-GenericCloud-latest.x86_64.qcow2
+cp -a AlmaLinux-10-GenericCloud-latest.x86_64.qcow2 alma10-base.qcow2
+
+# verify the checksum
+curl -O --silent https://repo.almalinux.org/almalinux/10/cloud/x86_64/images/CHECKSUM
+cat CHECKSUM
+sha256sum alma10-base.qcow2 
+8729862a9e2d93c478c2334b33d01d7ee21934a795a9b68550cc1c63ffd0efae  alma10-base.qcow2
+
+# install ACC on the base image
+sudo -E virt-customize -a alma10-base.qcow2 --network --upload settings.conf:/tmp/settings.conf --run install_sn_acc.sh 2>/dev/null
+[   0.0] Examining the guest ...
+[  17.4] Setting a random seed
+[  17.5] Uploading: settings.conf to /tmp/settings.conf
+[  17.5] Running: install_sn_acc.sh
+[  30.2] SELinux relabelling
+[  33.4] Finishing off
+
+# troubleshooting commands
+virt-inspector -a alma10-base.qcow2 2>/dev/null | grep "agent-client-collector"
+        <name>agent-client-collector</name>
+virt-cat -a alma10-base.qcow2 /tmp/builder.log 2>/dev/null
+virt-ls -a alma10-base.qcow2 /tmp 2>/dev/null
+virt-ls -lR -a alma10-base.qcow2 /opt/cache/servicenow 2>/dev/null
+virt-cat -a alma10-base.qcow2 /etc/servicenow/agent-client-collector/acc.yml 2>/dev/null
+
+### if ever needed:
+### sudo -E virt-customize -a alma10-base.qcow2 --run-command "cloud-init clean --logs --seed" 2>/dev/null
+
+# spin up 3 VMs
+./start_vdi.sh
+
+# connect to the first VM to confirm
+virsh --connect qemu:///session console vdi-client-1
+
+# delete the VMs
+./delete_vdi.sh
+
